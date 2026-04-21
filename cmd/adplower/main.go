@@ -13,7 +13,18 @@ var rootCmd = &cobra.Command{
 	Use:   "adplower",
 	Short: "AD-Plower - faster, meaner AD pentest tool",
 }
+var mcpCmd = &cobra.Command{
+	Use:   "mcp",
+	Short: "Start MCP server for Claude (Model Context Protocol)",
+	Run: func(cmd *cobra.Command, args []string) {
+		config.Load()
+		mcp.StartMCPServer()
+	},
+}
 
+func init() {
+	rootCmd.AddCommand(startCmd, mcpCmd)
+}
 var startCmd = &cobra.Command{
 	Use:   "start",
 	Short: "Launch TUI (auto/semi/manual)",
