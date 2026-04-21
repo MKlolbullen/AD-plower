@@ -1,0 +1,20 @@
+{
+  "$schema": "https://wails.io/schemas/config.v2.json",
+  "name": "ad-plower",
+  "outputfilename": "adplower-gui",
+  "frontend:install": "npm install",
+  "frontend:build": "npm run build",
+  "frontend:dev:watcher": "npm run dev",
+  "frontend:dev:serverUrl": "auto",
+  "wailsjsdir": "./cmd/adplower-gui/frontend/src",
+  "projectDir": "./cmd/adplower-gui",
+  "frontend:dir": "./cmd/adplower-gui/frontend",
+  "author": {
+    "name": "AD-Plower contributors"
+  },
+  "info": {
+    "productName": "AD-Plower",
+    "productVersion": "0.2.0",
+    "companyName": "AD-Plower"
+  }
+}

@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>AD-Plower</title>
+    <style>
+      html, body { margin:0; padding:0; height:100%; background:#0e1016; color:#e6e9f0; font-family: system-ui, sans-serif; display:flex; align-items:center; justify-content:center; text-align:center; }
+      .box { max-width: 560px; line-height: 1.5; }
+      code { background:#141823; padding:0.15em 0.45em; border-radius:4px; }
+    </style>
+  </head>
+  <body>
+    <div class="box">
+      <h1>AD-Plower frontend not built</h1>
+      <p>
+        Install the Wails CLI and build the frontend:
+      </p>
+      <pre><code>go install github.com/wailsapp/wails/v2/cmd/wails@latest
+cd cmd/adplower-gui/frontend
+npm install
+npm run build</code></pre>
+      <p>Then <code>wails build</code> (from the repo root) or re-run <code>go build ./cmd/adplower-gui</code>.</p>
+    </div>
+  </body>
+</html>
