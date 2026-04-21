@@ -1,0 +1,29 @@
+# AD-Plower configuration. Copy to config.yaml (or ~/.adplower/config.yaml)
+# and fill in the values that apply to your engagement. Every field can also
+# be supplied via environment variables (prefix ADPOWER_) or command flags.
+
+# Target
+domain: lab.local
+target: 192.168.56.10
+dc: dc01.lab.local
+username: ""
+password: ""
+nt_hash: ""
+dns_server: "192.168.56.10:53"
+
+# Workspace (auto-created). Defaults to ~/.adplower/<domain>.
+workspace: ""
+
+# BloodHound CE / Neo4j ingest
+bh_neo4j_uri: bolt://localhost:7687
+bh_neo4j_user: neo4j
+bh_neo4j_pass: bloodhoundcommunityedition
+bh_ce_enabled: true
+
+# Tuning
+threads: 10
+timeout_secs: 10
+
+# Wordlists for the password spray module
+user_list: ""
+password_list: ""

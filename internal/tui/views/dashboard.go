@@ -2,9 +2,11 @@ package views
 
 import (
 	"fmt"
-	tea "github.com/charmbracelet/bubbletea"
+
 	"github.com/charmbracelet/bubbles/table"
-	"github.com/MKlolbullen/AD-plower/internal/tui"
+	tea "github.com/charmbracelet/bubbletea"
+
+	"github.com/MKlolbullen/AD-plower/internal/tui/theme"
 	"github.com/MKlolbullen/AD-plower/internal/workspace"
 )
 
@@ -14,16 +16,26 @@ type Dashboard struct {
 
 func NewDashboard() Dashboard {
 	workspace.LoadResults()
+	snap := workspace.Snapshot()
 	columns := []table.Column{
-		{Title: "Category", Width: 20},
+		{Title: "Category", Width: 22},
 		{Title: "Value", Width: 55},
 	}
 	rows := []table.Row{
-		{"DCs", fmt.Sprintf("%v", workspace.CurrentResults.DCs)},
-		{"SMB Shares", fmt.Sprintf("%d", len(workspace.CurrentResults.SMBShares))},
-		{"BloodHound", "✅ Ingested"},
+		{"Domain", snap.Domain},
+		{"DCs", fmt.Sprintf("%d %v", len(snap.DCs), snap.DCs)},
+		{"Users", fmt.Sprintf("%d", len(snap.Users))},
+		{"Computers", fmt.Sprintf("%d", len(snap.Computers))},
+		{"Groups", fmt.Sprintf("%d", len(snap.Groups))},
+		{"Trusts", fmt.Sprintf("%d", len(snap.Trusts))},
+		{"SMB hosts", fmt.Sprintf("%d", len(snap.SMBHosts))},
+		{"ADCS CAs", fmt.Sprintf("%d", len(snap.ADCSCAs))},
+		{"AS-REP hashes", fmt.Sprintf("%d", len(snap.ASREPHashes))},
+		{"TGS hashes", fmt.Sprintf("%d", len(snap.TGSHashes))},
+		{"Valid creds", fmt.Sprintf("%d", len(snap.ValidCreds))},
+		{"Vuln findings", fmt.Sprintf("%d", len(snap.Vulns))},
 	}
-	t := table.New(table.WithColumns(columns), table.WithRows(rows), table.WithFocused(true))
+	t := table.New(table.WithColumns(columns), table.WithRows(rows), table.WithFocused(true), table.WithHeight(len(rows)+1))
 	return Dashboard{table: t}
 }
 
@@ -32,12 +44,15 @@ func (d Dashboard) Init() tea.Cmd { return nil }
 func (d Dashboard) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	d.table, cmd = d.table.Update(msg)
-	if msg, ok := msg.(tea.KeyMsg); ok && msg.Type == tea.KeyEsc {
-		return d, tea.Quit
+	if msg, ok := msg.(tea.KeyMsg); ok {
+		switch msg.String() {
+		case "esc", "q", "ctrl+c":
+			return d, tea.Quit
+		}
 	}
 	return d, cmd
 }
 
 func (d Dashboard) View() string {
-	return tui.TitleStyle.Render("AD-PLOWER DASHBOARD") + "\n\n" + d.table.View() + "\n\n" + tui.ModeStyle.Render("Esc to exit")
+	return theme.Title.Render("AD-PLOWER DASHBOARD") + "\n\n" + d.table.View() + "\n\n" + theme.Mode.Render("q/esc to exit")
 }

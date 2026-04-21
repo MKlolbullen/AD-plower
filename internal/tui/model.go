@@ -2,14 +2,18 @@ package tui
 
 import (
 	tea "github.com/charmbracelet/bubbletea"
+
 	"github.com/MKlolbullen/AD-plower/internal/tui/views"
 )
 
+// Model drives the top-level TUI state machine: target config → mode picker
+// → live dashboard. Each view returns a Done flag so we can advance without
+// leaking tea.Quit upwards.
 type Model struct {
 	targetConfig views.TargetConfig
 	modeSelector views.ModeSelector
 	dashboard    views.Dashboard
-	state        string // "target" | "selector" | "dashboard"
+	state        string
 }
 
 func InitialModel() Model {
@@ -24,19 +28,29 @@ func (m Model) Init() tea.Cmd { return m.targetConfig.Init() }
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch m.state {
 	case "target":
-		var cmd tea.Cmd
-		m.targetConfig, cmd = m.targetConfig.Update(msg).(views.TargetConfig)
-		if m.targetConfig.done {
+		updated, cmd := m.targetConfig.Update(msg)
+		m.targetConfig = updated.(views.TargetConfig)
+		if m.targetConfig.Done {
 			m.state = "selector"
 			m.modeSelector = views.NewModeSelector()
-			return m, nil
+			return m, m.modeSelector.Init()
+		}
+		return m, cmd
+	case "selector":
+		updated, cmd := m.modeSelector.Update(msg)
+		m.modeSelector = updated.(views.ModeSelector)
+		if m.modeSelector.Done {
+			m.state = "dashboard"
+			m.dashboard = views.NewDashboard()
+			return m, m.dashboard.Init()
 		}
 		return m, cmd
 	case "dashboard":
-		return m.dashboard.Update(msg)
-	default:
-		return m.modeSelector.Update(msg)
+		updated, cmd := m.dashboard.Update(msg)
+		m.dashboard = updated.(views.Dashboard)
+		return m, cmd
 	}
+	return m, nil
 }
 
 func (m Model) View() string {
@@ -48,4 +62,12 @@ func (m Model) View() string {
 	default:
 		return m.modeSelector.View()
 	}
+}
+
+// StartTUI runs the Bubble Tea program until the user quits. It's the entry
+// point for `adplower start`.
+func StartTUI() error {
+	p := tea.NewProgram(InitialModel(), tea.WithAltScreen())
+	_, err := p.Run()
+	return err
 }
