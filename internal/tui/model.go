@@ -1,43 +1,51 @@
 package tui
 
 import (
-	"fmt"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/MKlolbullen/AD-plower/internal/tui/views"
 )
 
 type Model struct {
+	targetConfig views.TargetConfig
 	modeSelector views.ModeSelector
 	dashboard    views.Dashboard
-	state        string // "selector" or "dashboard"
+	state        string // "target" | "selector" | "dashboard"
 }
 
 func InitialModel() Model {
 	return Model{
-		modeSelector: views.NewModeSelector(),
-		state:        "selector",
+		targetConfig: views.NewTargetConfig(),
+		state:        "target",
 	}
 }
 
-func (m Model) Init() tea.Cmd { return nil }
+func (m Model) Init() tea.Cmd { return m.targetConfig.Init() }
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	if m.state == "dashboard" {
+	switch m.state {
+	case "target":
+		var cmd tea.Cmd
+		m.targetConfig, cmd = m.targetConfig.Update(msg).(views.TargetConfig)
+		if m.targetConfig.done {
+			m.state = "selector"
+			m.modeSelector = views.NewModeSelector()
+			return m, nil
+		}
+		return m, cmd
+	case "dashboard":
 		return m.dashboard.Update(msg)
+	default:
+		return m.modeSelector.Update(msg)
 	}
-	return m.modeSelector.Update(msg)
 }
 
 func (m Model) View() string {
-	if m.state == "dashboard" {
+	switch m.state {
+	case "target":
+		return m.targetConfig.View()
+	case "dashboard":
 		return m.dashboard.View()
-	}
-	return m.modeSelector.View()
-}
-
-func StartTUI() {
-	p := tea.NewProgram(InitialModel(), tea.WithAltScreen())
-	if _, err := p.Run(); err != nil {
-		fmt.Printf("TUI error: %v\n", err)
+	default:
+		return m.modeSelector.View()
 	}
 }
