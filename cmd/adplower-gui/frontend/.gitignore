@@ -1,0 +1,9 @@
+node_modules
+# Vite output is regenerated; the stub dist/index.html is committed so that
+# `go build` works before the first `npm run build`.
+dist/assets
+dist/*.js
+dist/*.css
+
+# Wails auto-generated bindings
+src/wailsjs

@@ -50,6 +50,8 @@ end-to-end engagement autonomously.
 - **BloodHound CE** — direct Neo4j ingest of domain / DC / user / trust /
   SPN / roasted-user nodes
 - **Claude MCP** — every module registered as an MCP tool over stdio
+- **Wails GUI** — desktop app (Svelte + TypeScript frontend) with a sidebar
+  navigator, module runner, live dashboard, and streaming log panel
 - **TUI** — Bubble Tea target config + module picker + live dashboard
 - **Workspace** — per-module JSON evidence and atomic persistence
 
@@ -81,6 +83,49 @@ Requires Go 1.25+.
 Every subcommand accepts `--domain`, `--target`, `--user`, `--password`,
 `--nthash`, `--dc`. Config can also live in `./config.yaml` or
 `~/.adplower/config.yaml` — see `config.example.yaml`.
+
+## Desktop GUI (Wails)
+
+The desktop app lives under `cmd/adplower-gui` with a Svelte + TypeScript
+frontend under `cmd/adplower-gui/frontend`. The Go side binds every AD-Plower
+module to `window.go.gui.App.*` and streams live logs back to the UI via the
+Wails event bus.
+
+One-time setup:
+
+```bash
+go install github.com/wailsapp/wails/v2/cmd/wails@latest
+(cd cmd/adplower-gui/frontend && npm install)
+```
+
+Run / build:
+
+```bash
+wails dev     # hot-reload development session
+wails build   # production binary (macOS / Windows / Linux)
+
+# or bypass the Wails CLI:
+(cd cmd/adplower-gui/frontend && npm run build)
+go build -o adplower-gui ./cmd/adplower-gui
+```
+
+The GUI shares the same workspace and config as the CLI / TUI / MCP, so the
+same `$workspace/recon.json` bundle drives BloodHound ingest regardless of
+which entry point collected the evidence.
+
+### GUI layout
+
+| Pane       | What it does                                                     |
+|------------|------------------------------------------------------------------|
+| Target     | Domain / DC / credentials / BloodHound / threads                 |
+| Modules    | One card per module with module-specific form + run button       |
+| Dashboard  | Live stat tiles + vuln findings, trusts, CAs, captured creds     |
+| Logs       | Streaming per-module events (color-coded by scope)               |
+
+Wails requires platform-specific native toolchains (Xcode on macOS, WebView2
+on Windows, gtk3 + webkit2gtk on Linux). See the
+[Wails installation docs](https://wails.io/docs/gettingstarted/installation)
+for the per-platform prerequisites.
 
 ## Claude Desktop / MCP hosts
 
